@@ -31,6 +31,14 @@ app.get('/health', (req, res) => {
 // app.use('/api/scans', require('./api/routes/scanRoutes'));
 
 // Export for Vercel
+// Add this so the "Cannot GET /" goes away
+app.get('/', (req, res) => {
+  res.json({
+    status: "FaceGuard AI Backend is Online",
+    message: "Ready for skin analysis!",
+    timestamp: new Date().toISOString()
+  });
+});
 module.exports = app;
 
 // Local Development
