@@ -8,6 +8,18 @@ const app = express();
 
 // Security Middlewares
 app.use(helmet());
+// This tells the browser what to show at the main URL
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+      <h1 style="color: #6366f1;">🛡️ FaceGuard AI Backend is LIVE</h1>
+      <p>Database: Connected ✅</p>
+      <p>AI Engine: Gemini Flash 1.5 ✅</p>
+      <hr style="width: 200px; margin: 20px auto;">
+      <p style="color: #64748b;">Ready for API requests at /api/scans/analyze</p>
+    </div>
+  `);
+});
 app.use(cors());
 app.use(express.json());
 app.use('/api/scans', require('./api/routes/scanRoutes'));
