@@ -1,27 +1,30 @@
 const skinService = require('../services/skinService');
+const recService = require('../services/recommendationService');
 
 exports.performAnalysis = async (req, res) => {
   try {
-    const { imageUrl, currentProducts } = req.body;
+    const { concerns } = req.body; // Concerns sent from AI analysis
 
-    // 1. Safety Check (Feature 6)
-    const safetyWarnings = skinService.analyzeRoutineSafety(currentProducts);
+    // 1. Get Recommendations (Feature 2 & 10)
+    const recommendations = recService.getRecommendations(concerns || ['Acne']);
 
-    // 2. Mock AI Analysis (Feature 1)
-    // We will integrate real OpenAI Vision here in the next step
-    const mockAnalysis = {
-      skinType: 'Combination',
-      concerns: ['Mild Acne', 'Dehydration'],
-      glowScore: 78
+    // 2. Mock AI Analysis
+    const analysisResults = {
+      skinType: 'Oily',
+      glowScore: 82,
+      concerns: concerns || ['Acne']
     };
+
+    // 3. Safety Check
+    const safetyWarnings = skinService.analyzeRoutineSafety([]);
 
     res.json({
       success: true,
-      analysis: mockAnalysis,
-      warnings: safetyWarnings,
-      advice: "Drink 2L of water today and use a ceramide moisturizer."
+      analysis: analysisResults,
+      recommendation: recommendations,
+      warnings: safetyWarnings
     });
   } catch (error) {
-    res.status(500).json({ error: "Analysis failed" });
+    res.status(500).json({ error: "Analysis and Recommendation failed" });
   }
 };
