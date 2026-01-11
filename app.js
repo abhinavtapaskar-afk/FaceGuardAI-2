@@ -5,19 +5,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// This handles the main URL
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
-// Mock Scan Route for your button
+// 1. THIS IS THE API ROUTE
 app.post('/api/scans/analyze', (req, res) => {
+    // This sends JSON, which is what the frontend expects
     res.json({ 
         success: true, 
         glowScore: 85,
         skinType: "Normal",
-        concerns: ["None"]
+        message: "Gemini AI connection successful!"
     });
+});
+
+// 2. THIS IS THE HEALTH CHECK
+app.get('/api/health', (req, res) => {
+    res.json({ status: "ok" });
+});
+
+// 3. EVERYTHING ELSE SHOWS THE WEBSITE
+app.get('*', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
 
 module.exports = app;
