@@ -1,30 +1,25 @@
-const skinService = require('../services/skinService');
-const recService = require('../services/recommendationService');
+const { db } = require('../config/firebase');
 
 exports.performAnalysis = async (req, res) => {
   try {
-    const { concerns } = req.body; // Concerns sent from AI analysis
+    const { userId, concerns, imageUrl } = req.body;
 
-    // 1. Get Recommendations (Feature 2 & 10)
-    const recommendations = recService.getRecommendations(concerns || ['Acne']);
-
-    // 2. Mock AI Analysis
-    const analysisResults = {
-      skinType: 'Oily',
-      glowScore: 82,
-      concerns: concerns || ['Acne']
+    const analysisData = {
+      timestamp: new Date().toISOString(),
+      concerns: concerns || ["General"],
+      glowScore: Math.floor(Math.random() * 20) + 70, // Mock score for now
+      imageUrl: imageUrl
     };
 
-    // 3. Safety Check
-    const safetyWarnings = skinService.analyzeRoutineSafety([]);
+    // SAVE TO FIREBASE FIRESTORE
+    await db.collection('users').doc(userId).collection('scans').add(analysisData);
 
     res.json({
       success: true,
-      analysis: analysisResults,
-      recommendation: recommendations,
-      warnings: safetyWarnings
+      message: "Scan saved to Firebase!",
+      results: analysisData
     });
   } catch (error) {
-    res.status(500).json({ error: "Analysis and Recommendation failed" });
+    res.status(500).json({ error: error.message });
   }
 };
