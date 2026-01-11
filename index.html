@@ -3,124 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceGuard AI | Analysis Dashboard</title>
+    <title>FaceGuard AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 min-h-screen">
-
-    <nav class="bg-white border-b border-slate-200 p-4 shadow-sm">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-indigo-600">🛡️ FaceGuard AI</h1>
-            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold">SERVER LIVE</span>
-        </div>
-    </nav>
-
-    <main class="max-w-4xl mx-auto p-6">
-        <div id="capture-section" class="bg-white rounded-3xl p-8 shadow-xl text-center border border-slate-100">
-            <h2 class="text-2xl font-bold mb-2">Skin Analysis</h2>
-            <p class="text-slate-500 mb-8">Take a clear selfie to begin your AI skin consultation.</p>
-            
-            <div class="relative w-64 h-64 mx-auto mb-8 bg-slate-100 rounded-full flex items-center justify-center border-4 border-indigo-50 overflow-hidden">
-                <i id="camera-icon" class="fa-solid fa-camera text-4xl text-slate-300"></i>
-                <img id="preview" class="hidden absolute inset-0 w-full h-full object-cover">
-            </div>
-
-            <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden">
-            
-            <button onclick="document.getElementById('cameraInput').click()" 
-                class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition w-full md:w-auto">
-                Snap Selfie
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+    <div class="text-center p-10 bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 max-w-lg w-full">
+        <h1 class="text-4xl font-black mb-4">🛡️ FaceGuard AI</h1>
+        <p class="text-slate-400 mb-8">Advanced Skin Analysis Engine is Online.</p>
+        
+        <div class="space-y-4">
+            <input type="file" id="camera" accept="image/*" capture="user" class="hidden">
+            <button onclick="document.getElementById('camera').click()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl font-bold text-xl transition shadow-lg shadow-indigo-500/20">
+                📸 Start AI Scan
             </button>
+            <div id="status" class="text-sm text-slate-500 mt-4">Waiting for capture...</div>
         </div>
-
-        <div id="results-section" class="hidden mt-8 space-y-6">
-            <div class="bg-white rounded-3xl p-8 shadow-xl border-t-4 border-indigo-500">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold italic text-slate-800 underline">Gemini AI Results</h3>
-                    <div class="text-right">
-                        <span class="text-sm text-slate-400">Glow Score</span>
-                        <div id="score" class="text-3xl font-black text-indigo-600">--</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-50 p-4 rounded-2xl">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Skin Type</p>
-                        <p id="skinType" class="text-lg font-bold text-slate-700">Analyzing...</p>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-2xl">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Top Concerns</p>
-                        <p id="concerns" class="text-lg font-bold text-slate-700">Analyzing...</p>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="location.reload()" class="text-indigo-600 font-bold w-full text-center">New Analysis</button>
+        
+        <div id="results" class="hidden mt-8 p-4 bg-slate-900 rounded-xl text-left border border-slate-700">
+            <pre id="output" class="text-xs text-green-400 overflow-auto max-h-60"></pre>
         </div>
-
-        <div id="loader" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="text-center">
-                <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p class="font-bold text-indigo-900">AI is Analyzing Your Skin...</p>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
-        const VERCEL_URL = 'face-guard-ai-2.vercel.app'; // PASTE YOUR VERCEL LINK HERE
+        const camera = document.getElementById('camera');
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const resultsDiv = document.getElementById('results');
 
-        const cameraInput = document.getElementById('cameraInput');
-        const preview = document.getElementById('preview');
-        const icon = document.getElementById('camera-icon');
-        const loader = document.getElementById('loader');
-
-        cameraInput.onchange = (e) => {
+        camera.onchange = async (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    preview.src = event.target.result;
-                    preview.classList.remove('hidden');
-                    icon.classList.add('hidden');
-                    
-                    // Start Analysis
-                    analyzeSkin(event.target.result.split(',')[1]);
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+
+            status.innerText = "Processing with Gemini AI...";
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64 = reader.result.split(',')[1];
+                try {
+                    // This automatically calls the same URL the site is hosted on
+                    const res = await fetch('/api/scans/analyze', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ 
+                            imageBase64: base64, 
+                            hasConsented: true, 
+                            userId: "guest_user" 
+                        })
+                    });
+                    const data = await res.json();
+                    resultsDiv.classList.remove('hidden');
+                    output.innerText = JSON.stringify(data, null, 2);
+                    status.innerText = "Analysis Complete!";
+                } catch (err) {
+                    status.innerText = "Error: " + err.message;
+                }
+            };
         };
-
-        async function analyzeSkin(base64Image) {
-            loader.classList.remove('hidden');
-            try {
-                const res = await fetch(`${VERCEL_URL}/api/scans/analyze`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64: base64Image,
-                        hasConsented: true,
-                        userId: "user_" + Math.floor(Math.random() * 1000)
-                    })
-                });
-
-                const data = await res.json();
-                
-                // Display Results
-                document.getElementById('capture-section').classList.add('hidden');
-                document.getElementById('results-section').classList.remove('hidden');
-                
-                document.getElementById('score').innerText = data.glowScore || "85";
-                document.getElementById('skinType').innerText = data.skinType || "Normal";
-                document.getElementById('concerns').innerText = data.concerns ? data.concerns.join(', ') : "None detected";
-
-            } catch (err) {
-                alert("Server Connection Failed. Is your Vercel URL correct?");
-                console.error(err);
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
     </script>
 </body>
 </html>
