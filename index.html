@@ -108,6 +108,44 @@
                 scanBtn.innerText = "Analyze My Skin";
             }
         }
-    </script>
+    <script>
+    const VERCEL_URL = 'YOUR_VERCEL_URL';
+
+    // This function opens the user's camera
+    async function runScan() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.capture = 'user'; // Opens front camera on mobile
+        
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onloadend = async () => {
+                const base64String = reader.result.split(',')[1];
+                
+                // Show loading state
+                document.getElementById('json-output').innerText = "Gemini AI is analyzing your skin...";
+                document.getElementById('results').classList.remove('hidden');
+
+                const response = await fetch(`${VERCEL_URL}/api/scans/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: base64String,
+                        hasConsented: true,
+                        userId: "test_user_123"
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
+            };
+            reader.readAsDataURL(file);
+        };
+        fileInput.click();
+    }
+</script>
 </body>
 </html>
