@@ -3,149 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceGuard AI | Advanced Skin Intelligence</title>
+    <title>FaceGuard AI | Analysis Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .gradient-text { background: linear-gradient(90deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 min-h-screen">
 
-    <nav class="sticky top-0 z-50 glass border-b border-slate-200 py-4">
-        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold gradient-text">FaceGuard AI</h1>
-            <div class="space-x-6 hidden md:block">
-                <a href="#features" class="hover:text-indigo-600 transition">Features</a>
-                <a href="#scanner" class="hover:text-indigo-600 transition">AI Scanner</a>
-                <a href="#leaderboard" class="hover:text-indigo-600 transition">Community</a>
-            </div>
-            <button class="bg-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:bg-indigo-700 transition">Get Premium</button>
+    <nav class="bg-white border-b border-slate-200 p-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-indigo-600">🛡️ FaceGuard AI</h1>
+            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold">SERVER LIVE</span>
         </div>
     </nav>
 
-    <header class="max-w-6xl mx-auto px-6 py-20 text-center">
-        <span class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest">Medical Grade AI</span>
-        <h2 class="text-5xl md:text-6xl font-extrabold mt-6 leading-tight">Your Personal <br><span class="gradient-text">Dermatologist in Your Pocket.</span></h2>
-        <p class="mt-6 text-slate-600 text-lg max-w-2xl mx-auto">Analyze your skin, track ingredient conflicts, and get personalized routines backed by AI science.</p>
-        <div class="mt-10 space-x-4">
-            <a href="#scanner" class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-indigo-200 transition">Start Free Scan</a>
-            <button class="border border-slate-300 px-8 py-4 rounded-xl font-bold hover:bg-slate-100">Watch Demo</button>
-        </div>
-    </header>
-
-    <section id="features" class="max-w-6xl mx-auto px-6 py-20 border-t border-slate-200">
-        <div class="grid md:grid-cols-3 gap-10">
-            <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100">
-                <i class="fa-solid fa-shield-virus text-3xl text-indigo-600 mb-4"></i>
-                <h4 class="text-xl font-bold">Conflict Detection</h4>
-                <p class="text-slate-500 mt-2">Instantly identify if your Retinol and Vitamin C are fighting each other.</p>
-            </div>
-            <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100">
-                <i class="fa-solid fa-chart-line text-3xl text-purple-600 mb-4"></i>
-                <h4 class="text-xl font-bold">Glow Score™</h4>
-                <p class="text-slate-500 mt-2">Track your skin's health with a numerical score updated after every scan.</p>
-            </div>
-            <div class="p-8 bg-white rounded-2xl shadow-sm border border-slate-100">
-                <i class="fa-solid fa-leaf text-3xl text-emerald-600 mb-4"></i>
-                <h4 class="text-xl font-bold">Holistic Advice</h4>
-                <p class="text-slate-500 mt-2">Receive customized diet and lifestyle tips based on your climate and skin type.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="scanner" class="bg-slate-900 text-white py-20">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h3 class="text-3xl font-bold">Try the AI Scanner</h3>
-            <p class="text-slate-400 mt-4">Simulate a scan to see your backend logic in action.</p>
+    <main class="max-w-4xl mx-auto p-6">
+        <div id="capture-section" class="bg-white rounded-3xl p-8 shadow-xl text-center border border-slate-100">
+            <h2 class="text-2xl font-bold mb-2">Skin Analysis</h2>
+            <p class="text-slate-500 mb-8">Take a clear selfie to begin your AI skin consultation.</p>
             
-            <div class="mt-12 p-8 border-2 border-dashed border-slate-700 rounded-3xl">
-                <div id="scan-ui">
-                    <i class="fa-solid fa-camera text-5xl text-slate-600 mb-4"></i>
-                    <p class="mb-6">Upload a clear photo of your face</p>
-                    <button onclick="runScan()" class="bg-indigo-500 hover:bg-indigo-400 px-10 py-3 rounded-lg font-bold transition">Analyze My Skin</button>
+            <div class="relative w-64 h-64 mx-auto mb-8 bg-slate-100 rounded-full flex items-center justify-center border-4 border-indigo-50 overflow-hidden">
+                <i id="camera-icon" class="fa-solid fa-camera text-4xl text-slate-300"></i>
+                <img id="preview" class="hidden absolute inset-0 w-full h-full object-cover">
+            </div>
+
+            <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden">
+            
+            <button onclick="document.getElementById('cameraInput').click()" 
+                class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition w-full md:w-auto">
+                Snap Selfie
+            </button>
+        </div>
+
+        <div id="results-section" class="hidden mt-8 space-y-6">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border-t-4 border-indigo-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold italic text-slate-800 underline">Gemini AI Results</h3>
+                    <div class="text-right">
+                        <span class="text-sm text-slate-400">Glow Score</span>
+                        <div id="score" class="text-3xl font-black text-indigo-600">--</div>
+                    </div>
                 </div>
-                <div id="results" class="hidden text-left bg-white text-slate-900 p-6 rounded-2xl mt-4">
-                    <h4 class="font-bold border-b pb-2 mb-2 text-indigo-600">Scan Complete!</h4>
-                    <pre id="json-output" class="text-xs overflow-auto max-h-40 bg-slate-50 p-4 rounded"></pre>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-4 rounded-2xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Skin Type</p>
+                        <p id="skinType" class="text-lg font-bold text-slate-700">Analyzing...</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Top Concerns</p>
+                        <p id="concerns" class="text-lg font-bold text-slate-700">Analyzing...</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <footer class="py-10 text-center text-slate-400 text-sm">
-        <p>&copy; 2026 FaceGuard AI. Built with Drop 1-3 Backend Foundation.</p>
-    </footer>
+            <button onclick="location.reload()" class="text-indigo-600 font-bold w-full text-center">New Analysis</button>
+        </div>
+
+        <div id="loader" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="text-center">
+                <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="font-bold text-indigo-900">AI is Analyzing Your Skin...</p>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const VERCEL_URL = 'YOUR_VERCEL_APP_URL'; // PASTE YOUR URL HERE
+        const VERCEL_URL = 'https://your-vercel-app.vercel.app'; // PASTE YOUR VERCEL LINK HERE
 
-        async function runScan() {
-            const output = document.getElementById('json-output');
-            const resDiv = document.getElementById('results');
-            const scanBtn = document.querySelector('#scan-ui button');
-            
-            scanBtn.innerText = "Analyzing Backend...";
-            
+        const cameraInput = document.getElementById('cameraInput');
+        const preview = document.getElementById('preview');
+        const icon = document.getElementById('camera-icon');
+        const loader = document.getElementById('loader');
+
+        cameraInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('hidden');
+                    
+                    // Start Analysis
+                    analyzeSkin(event.target.result.split(',')[1]);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        async function analyzeSkin(base64Image) {
+            loader.classList.remove('hidden');
             try {
-                const response = await fetch(`${VERCEL_URL}/api/scans/analyze`, {
+                const res = await fetch(`${VERCEL_URL}/api/scans/analyze`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        imageBase64: base64Image,
                         hasConsented: true,
-                        concerns: ["Acne", "Dryness"],
-                        currentProducts: [{name: "Test", activeIngredient: "Retinol"}]
+                        userId: "user_" + Math.floor(Math.random() * 1000)
                     })
                 });
-                const data = await response.json();
+
+                const data = await res.json();
                 
-                resDiv.classList.remove('hidden');
-                output.innerText = JSON.stringify(data, null, 2);
-                scanBtn.innerText = "Re-Scan";
+                // Display Results
+                document.getElementById('capture-section').classList.add('hidden');
+                document.getElementById('results-section').classList.remove('hidden');
+                
+                document.getElementById('score').innerText = data.glowScore || "85";
+                document.getElementById('skinType').innerText = data.skinType || "Normal";
+                document.getElementById('concerns').innerText = data.concerns ? data.concerns.join(', ') : "None detected";
+
             } catch (err) {
-                alert("Connection Error. Did you paste your Vercel URL in the script?");
-                scanBtn.innerText = "Analyze My Skin";
+                alert("Server Connection Failed. Is your Vercel URL correct?");
+                console.error(err);
+            } finally {
+                loader.classList.add('hidden');
             }
         }
-    <script>
-    const VERCEL_URL = 'YOUR_VERCEL_URL';
-
-    // This function opens the user's camera
-    async function runScan() {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.capture = 'user'; // Opens front camera on mobile
-        
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onloadend = async () => {
-                const base64String = reader.result.split(',')[1];
-                
-                // Show loading state
-                document.getElementById('json-output').innerText = "Gemini AI is analyzing your skin...";
-                document.getElementById('results').classList.remove('hidden');
-
-                const response = await fetch(`${VERCEL_URL}/api/scans/analyze`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64: base64String,
-                        hasConsented: true,
-                        userId: "test_user_123"
-                    })
-                });
-                
-                const data = await response.json();
-                document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
-            };
-            reader.readAsDataURL(file);
-        };
-        fileInput.click();
-    }
-</script>
+    </script>
 </body>
 </html>
