@@ -10,6 +10,7 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use('/api/scans', require('./api/routes/scanRoutes'));
 
 // Global Rate Limiter
 const globalLimiter = rateLimit({
