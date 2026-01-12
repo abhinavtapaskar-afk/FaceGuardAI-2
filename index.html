@@ -109,158 +109,6 @@
             margin-top: 10px;
         }
 
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-        }
-
-        .upload-area:hover {
-            background: #f8f9ff;
-            border-color: #764ba2;
-        }
-
-        .upload-area.dragover {
-            background: #f0f4ff;
-            border-color: #667eea;
-        }
-
-        #preview {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 12px;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .results {
-            display: none;
-        }
-
-        .results.active {
-            display: block;
-        }
-
-        .glow-score {
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        .glow-score h2 {
-            font-size: 4em;
-            margin-bottom: 10px;
-        }
-
-        .glow-score p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .analysis-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-        }
-
-        .analysis-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .issue-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin: 5px;
-            font-weight: 600;
-        }
-
-        .severity-mild {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .severity-moderate {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .severity-severe {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .routine-section {
-            margin-top: 30px;
-        }
-
-        .routine-step {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .routine-step h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .disclaimer {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .disclaimer strong {
-            color: #856404;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .error {
             background: #f8d7da;
             color: #721c24;
@@ -287,52 +135,23 @@
             display: block;
         }
 
-        .user-info {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none;
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
         }
 
-        .user-info.active {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-item .value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-item .label {
-            font-size: 0.9em;
-            color: #666;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2em;
-            }
-
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .user-info.active {
-                flex-direction: column;
-                gap: 20px;
             }
         }
     </style>
@@ -344,117 +163,89 @@
             <p>AI-Powered Skincare Analysis & Personalized Recommendations</p>
         </div>
 
-        <!-- User Info (shown when logged in) -->
-        <div class="user-info" id="userInfo">
-            <div>
-                <h3 id="userName">Welcome!</h3>
-                <p id="userTier">Free Tier</p>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="value" id="glowScore">0</div>
-                    <div class="label">Glow Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="value" id="streak">0</div>
-                    <div class="label">Streak</div>
-                </div>
-            </div>
-            <button class="btn btn-secondary" onclick="logout()">Logout</button>
-        </div>
-
         <!-- Auth Section -->
         <div class="card auth-section active" id="authSection">
             <h2 style="margin-bottom: 30px; text-align: center;">Get Started</h2>
             
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+
             <div id="loginForm">
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="loginEmail" placeholder="your@email.com">
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••">
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
                 </div>
-                <button class="btn" onclick="login()">Login</button>
+                <button class="btn" id="loginBtn" onclick="login()">
+                    <span id="loginBtnText">Login</span>
+                </button>
                 <button class="btn btn-secondary" onclick="showRegister()">Create Account</button>
             </div>
 
             <div id="registerForm" style="display: none;">
                 <div class="form-group">
                     <label>Display Name</label>
-                    <input type="text" id="registerName" placeholder="John Doe">
+                    <input type="text" id="registerName" placeholder="John Doe" required>
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="registerEmail" placeholder="your@email.com">
+                    <input type="email" id="registerEmail" placeholder="your@email.com" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="registerPassword" placeholder="••••••••">
+                    <input type="password" id="registerPassword" placeholder="••••••••" required>
                 </div>
-                <button class="btn" onclick="register()">Create Account</button>
+                <button class="btn" id="registerBtn" onclick="register()">
+                    <span id="registerBtnText">Create Account</span>
+                </button>
                 <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
             </div>
         </div>
 
-        <!-- Main App Section -->
-        <div class="card" id="appSection" style="display: none;">
-            <h2 style="margin-bottom: 30px;">Analyze Your Skin</h2>
-            
-            <div class="error" id="error"></div>
-            <div class="success" id="success"></div>
-
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                <h3>📸 Upload Your Photo</h3>
-                <p>Click to select or drag and drop your image here</p>
-                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                    Supported: JPG, PNG (Max 10MB)
-                </p>
+        <!-- Success Page -->
+        <div class="card" id="successPage" style="display: none;">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">✅ Welcome to FaceGuard AI!</h2>
+            <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">
+                Your account has been created successfully. The full application is coming soon!
+            </p>
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; text-align: center;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">🚀 What's Next?</h3>
+                <p style="margin-bottom: 10px;">✨ AI-powered skin analysis</p>
+                <p style="margin-bottom: 10px;">📊 Personalized skincare routines</p>
+                <p style="margin-bottom: 10px;">📈 Progress tracking & glow score</p>
+                <p style="margin-bottom: 10px;">🏆 Leaderboard & achievements</p>
             </div>
-
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
-            
-            <img id="preview" alt="Preview">
-            
-            <button class="btn" id="analyzeBtn" onclick="analyzeSkin()" style="display: none;">
-                🔬 Analyze Skin
-            </button>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Analyzing your skin with AI... This may take a moment.</p>
-            </div>
-
-            <div class="results" id="results">
-                <!-- Results will be populated here -->
-            </div>
+            <button class="btn" style="margin-top: 30px;" onclick="logout()">Logout</button>
         </div>
     </div>
 
     <script>
         const API_URL = window.location.origin + '/api';
-        let authToken = localStorage.getItem('authToken');
-        let selectedImage = null;
-
-        // Check if user is logged in
-        if (authToken) {
-            loadUserProfile();
-        }
+        console.log('API URL:', API_URL);
 
         function showRegister() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'block';
+            clearMessages();
         }
 
         function showLogin() {
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.getElementById('error').classList.remove('active');
+            document.getElementById('success').classList.remove('active');
         }
 
         async function register() {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
 
             if (!name || !email || !password) {
@@ -462,30 +253,58 @@
                 return;
             }
 
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            const btnText = document.getElementById('registerBtnText');
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span> Creating account...';
+
             try {
+                console.log('Registering user:', { email, displayName: name });
+                
                 const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ displayName: name, email, password })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        displayName: name, 
+                        email, 
+                        password 
+                    })
                 });
 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
-                    authToken = data.data.token;
-                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('authToken', data.data.token);
+                    localStorage.setItem('userName', data.data.user.displayName);
                     showSuccess('Account created successfully!');
-                    loadUserProfile();
+                    setTimeout(() => {
+                        document.getElementById('authSection').style.display = 'none';
+                        document.getElementById('successPage').style.display = 'block';
+                    }, 1000);
                 } else {
-                    showError(data.error || 'Registration failed');
+                    showError(data.error || 'Registration failed. Please try again.');
                 }
             } catch (error) {
-                showError('Network error. Please try again.');
+                console.error('Registration error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Create Account';
             }
         }
 
         async function login() {
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
             if (!email || !password) {
@@ -493,218 +312,84 @@
                 return;
             }
 
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span> Logging in...';
+
             try {
+                console.log('Logging in user:', { email });
+                
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({ email, password })
                 });
 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
-                    authToken = data.data.token;
-                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('authToken', data.data.token);
+                    localStorage.setItem('userName', data.data.user.displayName);
                     showSuccess('Login successful!');
-                    loadUserProfile();
+                    setTimeout(() => {
+                        document.getElementById('authSection').style.display = 'none';
+                        document.getElementById('successPage').style.display = 'block';
+                    }, 1000);
                 } else {
-                    showError(data.error || 'Login failed');
+                    showError(data.error || 'Login failed. Please check your credentials.');
                 }
             } catch (error) {
-                showError('Network error. Please try again.');
-            }
-        }
-
-        async function loadUserProfile() {
-            try {
-                const response = await fetch(`${API_URL}/auth/profile`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('userName').textContent = `Welcome, ${data.data.displayName}!`;
-                    document.getElementById('userTier').textContent = `${data.data.tier.toUpperCase()} Tier`;
-                    document.getElementById('glowScore').textContent = data.data.glowScore || 0;
-                    document.getElementById('streak').textContent = data.data.streak || 0;
-                    
-                    document.getElementById('authSection').classList.remove('active');
-                    document.getElementById('userInfo').classList.add('active');
-                    document.getElementById('appSection').style.display = 'block';
-                } else {
-                    logout();
-                }
-            } catch (error) {
-                logout();
+                console.error('Login error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Login';
             }
         }
 
         function logout() {
             localStorage.removeItem('authToken');
-            authToken = null;
-            document.getElementById('authSection').classList.add('active');
-            document.getElementById('userInfo').classList.remove('active');
-            document.getElementById('appSection').style.display = 'none';
+            localStorage.removeItem('userName');
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('successPage').style.display = 'none';
             showLogin();
-        }
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (file.size > 10 * 1024 * 1024) {
-                showError('File size must be less than 10MB');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                selectedImage = e.target.result;
-                document.getElementById('preview').src = selectedImage;
-                document.getElementById('preview').style.display = 'block';
-                document.getElementById('analyzeBtn').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function analyzeSkin() {
-            if (!selectedImage) {
-                showError('Please select an image first');
-                return;
-            }
-
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('analyzeBtn').disabled = true;
-            document.getElementById('results').classList.remove('active');
-
-            try {
-                const response = await fetch(`${API_URL}/scans/analyze`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ imageBase64: selectedImage })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    displayResults(data.data);
-                    showSuccess('Analysis complete!');
-                    
-                    // Update user stats
-                    document.getElementById('glowScore').textContent = data.data.userStats.glowScore;
-                    document.getElementById('streak').textContent = data.data.userStats.streak;
-                } else {
-                    showError(data.error || 'Analysis failed');
-                }
-            } catch (error) {
-                showError('Network error. Please try again.');
-            } finally {
-                document.getElementById('loading').classList.remove('active');
-                document.getElementById('analyzeBtn').disabled = false;
-            }
-        }
-
-        function displayResults(data) {
-            const resultsDiv = document.getElementById('results');
-            
-            let html = `
-                <div class="glow-score">
-                    <h2>${data.analysis.glowScore}</h2>
-                    <p>Your Glow Score</p>
-                </div>
-
-                <div class="analysis-grid">
-                    <div class="analysis-card">
-                        <h3>Skin Type</h3>
-                        <p style="font-size: 1.5em; font-weight: bold; color: #667eea;">${data.analysis.skinType}</p>
-                    </div>
-
-                    <div class="analysis-card">
-                        <h3>Confidence</h3>
-                        <p style="font-size: 1.5em; font-weight: bold; color: #667eea;">${data.analysis.confidence}%</p>
-                    </div>
-                </div>
-
-                <div class="analysis-card">
-                    <h3>Detected Issues</h3>
-                    ${data.analysis.issues.map(issue => `
-                        <span class="issue-badge severity-${issue.severity.toLowerCase()}">
-                            ${issue.category} - ${issue.severity}
-                        </span>
-                    `).join('')}
-                </div>
-
-                <div class="routine-section">
-                    <h3>Morning Routine</h3>
-                    ${data.recommendations.routine.morning.map(step => `
-                        <div class="routine-step">
-                            <h4>Step ${step.step}: ${step.category}</h4>
-                            <p><strong>${step.product.name}</strong></p>
-                            <p>${step.instructions}</p>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="routine-section">
-                    <h3>Night Routine</h3>
-                    ${data.recommendations.routine.night.map(step => `
-                        <div class="routine-step">
-                            <h4>Step ${step.step}: ${step.category}</h4>
-                            <p><strong>${step.product.name}</strong></p>
-                            <p>${step.instructions}</p>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="disclaimer">
-                    <strong>⚠️ Medical Disclaimer:</strong> ${data.disclaimers.medical}
-                </div>
-            `;
-
-            resultsDiv.innerHTML = html;
-            resultsDiv.classList.add('active');
+            clearMessages();
         }
 
         function showError(message) {
             const errorDiv = document.getElementById('error');
-            errorDiv.textContent = message;
+            errorDiv.textContent = '❌ ' + message;
             errorDiv.classList.add('active');
             setTimeout(() => errorDiv.classList.remove('active'), 5000);
         }
 
         function showSuccess(message) {
             const successDiv = document.getElementById('success');
-            successDiv.textContent = message;
+            successDiv.textContent = '✅ ' + message;
             successDiv.classList.add('active');
             setTimeout(() => successDiv.classList.remove('active'), 3000);
         }
 
-        // Drag and drop
-        const uploadArea = document.getElementById('uploadArea');
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+        // Check if already logged in
+        if (localStorage.getItem('authToken')) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+        }
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const input = document.getElementById('fileInput');
-                input.files = e.dataTransfer.files;
-                handleFileSelect({ target: input });
-            }
+        // Add enter key support
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('registerPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') register();
+            });
         });
     </script>
 </body>
