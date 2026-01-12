@@ -35,43 +35,47 @@ const SYSTEM_PROMPT = `You are an expert dermatologist AI. Analyze the image and
 app.post('/api/scans/analyze', async (req, res) => {
     try {
         const { imageBase64 } = req.body;
-        if (!imageBase64) return res.status(400).json({ error: "No image" });
+        if (!imageBase64) return res.status(400).json({ error: "No image provided" });
 
-        // A. Call Gemini Vision
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
         const result = await model.generateContent([
             SYSTEM_PROMPT,
             { inlineData: { data: imageBase64, mimeType: "image/jpeg" } }
         ]);
-        
-        const response = await result.response;
-        const analysis = JSON.parse(response.text().replace(/```json|```/g, ""));
 
-        // B. Run your Recommendation Logic (Integration)
-        const recommendations = {
-            skinType: analysis.skinType,
-            issues: analysis.issues,
+        const response = await result.response;
+        const rawText = response.text();
+        
+        // --- CLEANING LOGIC ---
+        // This removes any extra text Gemini might add like "Here is your JSON:"
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("AI did not return valid JSON");
+        
+        const analysis = JSON.parse(jsonMatch[0]);
+
+        // Merge AI data with your Recommendation logic
+        const finalData = {
+            success: true,
+            skinType: analysis.skinType || "Unknown",
+            issues: analysis.issues || [],
             routine: {
-                morning: ["Gentle Cleanser", "Vitamin C Serum", "SPF 50"],
+                morning: ["Gentle Cleanser", "Vitamin C", "SPF 50"],
                 night: ["Double Cleanse", "Moisturizer"]
             },
             disclaimer: MEDICAL_DISCLAIMER
         };
 
-        // Add Skin Cycling if Acne + Aging found
-        const hasAcne = analysis.issues.some(i => i.category.toLowerCase().includes('acne'));
-        const hasAging = analysis.issues.some(i => i.category.toLowerCase().includes('aging'));
-        
-        if (hasAcne && hasAging) {
-            recommendations.skinCycling = "Enabled: Alternate Retinol and BHA nights.";
-        }
+        res.json(finalData);
 
-        res.json(recommendations);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Analysis failed", details: error.message });
+        console.error("DETAILED ERROR:", error);
+        // This sends the SPECIFIC error to your screen so we can see it
+        res.status(500).json({ error: error.message });
     }
 });
+   
+
 const path = require('path'); // Add this at the very top with other requires
 
 // ... (your existing code) ...
