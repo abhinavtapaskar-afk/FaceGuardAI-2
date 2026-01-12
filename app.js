@@ -72,5 +72,19 @@ app.post('/api/scans/analyze', async (req, res) => {
         res.status(500).json({ error: "Analysis failed", details: error.message });
     }
 });
+const path = require('path'); // Add this at the very top with other requires
+
+// ... (your existing code) ...
+
+// --- 4. SERVE THE FRONTEND ---
+// This tells Express to serve index.html when people visit the root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Optional: A health check to test if the API is awake
+app.get('/api/health', (req, res) => {
+    res.json({ status: "FaceGuard AI Backend is Online" });
+});
 
 module.exports = app;
