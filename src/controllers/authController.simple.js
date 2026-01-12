@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-// In-memory user storage (temporary - will be replaced with Firebase)
+// In-memory user storage (temporary - will be replaced with database)
 const users = new Map();
 
 /**
- * Simplified Authentication Controller (No Firebase)
+ * Ultra-Simplified Authentication Controller
+ * No external dependencies except jwt and bcrypt
  */
 class AuthController {
   /**
@@ -13,10 +14,13 @@ class AuthController {
    */
   static async register(req, res) {
     try {
+      console.log('Register request received:', { body: req.body });
+      
       const { email, password, displayName } = req.body;
 
       // Validate input
       if (!email || !password || !displayName) {
+        console.log('Validation failed: missing fields');
         return res.status(400).json({
           success: false,
           error: 'Email, password, and display name are required'
@@ -26,6 +30,7 @@ class AuthController {
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
+        console.log('Validation failed: invalid email');
         return res.status(400).json({
           success: false,
           error: 'Invalid email format'
@@ -34,6 +39,7 @@ class AuthController {
 
       // Validate password length
       if (password.length < 6) {
+        console.log('Validation failed: password too short');
         return res.status(400).json({
           success: false,
           error: 'Password must be at least 6 characters'
@@ -41,13 +47,15 @@ class AuthController {
       }
 
       // Check if user already exists
-      if (users.has(email)) {
+      if (users.has(email.toLowerCase())) {
+        console.log('User already exists:', email);
         return res.status(400).json({
           success: false,
           error: 'User with this email already exists'
         });
       }
 
+      console.log('Hashing password...');
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -57,7 +65,7 @@ class AuthController {
       // Store user
       const userData = {
         id: userId,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         displayName,
         tier: 'free',
@@ -66,22 +74,29 @@ class AuthController {
         createdAt: new Date().toISOString()
       };
 
-      users.set(email, userData);
+      users.set(email.toLowerCase(), userData);
+      console.log('User created successfully:', userId);
+      console.log('Total users:', users.size);
 
       // Generate JWT token
+      const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production-please';
+      console.log('Generating JWT token...');
+      
       const token = jwt.sign(
-        { userId, email },
-        process.env.JWT_SECRET || 'fallback-secret-key-change-in-production',
+        { userId, email: email.toLowerCase() },
+        jwtSecret,
         { expiresIn: '7d' }
       );
 
+      console.log('Registration successful!');
+      
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
         data: {
           user: {
             id: userId,
-            email,
+            email: email.toLowerCase(),
             displayName,
             tier: 'free'
           },
@@ -90,10 +105,12 @@ class AuthController {
       });
     } catch (error) {
       console.error('Registration error:', error);
+      console.error('Error stack:', error.stack);
       res.status(500).json({
         success: false,
         error: 'Registration failed',
-        details: error.message
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -103,10 +120,13 @@ class AuthController {
    */
   static async login(req, res) {
     try {
+      console.log('Login request received:', { email: req.body.email });
+      
       const { email, password } = req.body;
 
       // Validate input
       if (!email || !password) {
+        console.log('Validation failed: missing fields');
         return res.status(400).json({
           success: false,
           error: 'Email and password are required'
@@ -114,29 +134,39 @@ class AuthController {
       }
 
       // Get user
-      const user = users.get(email);
+      const user = users.get(email.toLowerCase());
       if (!user) {
+        console.log('User not found:', email);
+        console.log('Available users:', Array.from(users.keys()));
         return res.status(401).json({
           success: false,
           error: 'Invalid email or password'
         });
       }
 
+      console.log('User found, verifying password...');
+      
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
+        console.log('Invalid password for user:', email);
         return res.status(401).json({
           success: false,
           error: 'Invalid email or password'
         });
       }
 
+      console.log('Password verified, generating token...');
+
       // Generate JWT token
+      const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production-please';
       const token = jwt.sign(
         { userId: user.id, email: user.email },
-        process.env.JWT_SECRET || 'fallback-secret-key-change-in-production',
+        jwtSecret,
         { expiresIn: '7d' }
       );
+
+      console.log('Login successful!');
 
       res.json({
         success: true,
@@ -155,10 +185,12 @@ class AuthController {
       });
     } catch (error) {
       console.error('Login error:', error);
+      console.error('Error stack:', error.stack);
       res.status(500).json({
         success: false,
         error: 'Login failed',
-        details: error.message
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -186,7 +218,8 @@ class AuthController {
       console.error('Get profile error:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to get profile'
+        error: 'Failed to get profile',
+        details: error.message
       });
     }
   }
@@ -205,6 +238,31 @@ class AuthController {
       res.status(500).json({
         success: false,
         error: 'Logout failed'
+      });
+    }
+  }
+
+  /**
+   * Debug endpoint - list all users (remove in production!)
+   */
+  static async debug(req, res) {
+    try {
+      const userList = Array.from(users.values()).map(u => ({
+        id: u.id,
+        email: u.email,
+        displayName: u.displayName,
+        createdAt: u.createdAt
+      }));
+
+      res.json({
+        success: true,
+        totalUsers: users.size,
+        users: userList
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message
       });
     }
   }
