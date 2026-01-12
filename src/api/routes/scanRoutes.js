@@ -1,10 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const scanController = require('../../controllers/scanController');
-const { checkTierLimit } = require('../../middleware/tierGuard');
-const { trackConsent } = require('../../middleware/compliance');
+const ScanController = require('../../controllers/scanController');
+const { authenticate } = require('../../middleware/auth');
+const { checkScanLimit } = require('../../middleware/tierCheck');
+const { scanLimiter } = require('../../middleware/rateLimiter');
 
-// This route uses Tier Gating AND Compliance Tracking!
-router.post('/analyze', trackConsent, checkTierLimit, scanController.performAnalysis);
+// All scan routes require authentication
+router.use(authenticate);
+
+// Analyze skin (with tier-based limits)
+router.post('/analyze', scanLimiter, checkScanLimit, ScanController.analyzeSkin);
+
+// Get scan history
+router.get('/history', ScanController.getScanHistory);
+
+// Get specific scan details
+router.get('/:scanId', ScanController.getScanDetails);
+
+// Get progress report
+router.get('/progress/report', ScanController.getProgressReport);
+
+// Compare two scans
+router.get('/progress/compare', ScanController.compareScans);
+
+// Get statistics
+router.get('/stats/overview', ScanController.getStatistics);
 
 module.exports = router;
