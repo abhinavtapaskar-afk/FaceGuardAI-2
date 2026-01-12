@@ -42,6 +42,7 @@
                 try {
                     // This automatically calls the same URL the site is hosted on
                     const res = await fetch('/api/scans/analyze', {
+;
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ 
