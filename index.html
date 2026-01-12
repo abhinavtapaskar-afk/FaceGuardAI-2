@@ -3,63 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaceGuard AI</title>
+    <title>FaceGuard AI | Professional Skin Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .scan-line { 
+            height: 3px; 
+            background: linear-gradient(to right, transparent, #6366f1, transparent); 
+            position: absolute; 
+            width: 100%; 
+            top: 0; 
+            z-index: 10;
+            animation: scan 2s linear infinite; 
+            box-shadow: 0 0 15px #6366f1;
+        }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+        .hidden { display: none; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
-    <div class="text-center p-10 bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 max-w-lg w-full">
-        <h1 class="text-4xl font-black mb-4">🛡️ FaceGuard AI</h1>
-        <p class="text-slate-400 mb-8">Advanced Skin Analysis Engine is Online.</p>
-        
-        <div class="space-y-4">
-            <input type="file" id="camera" accept="image/*" capture="user" class="hidden">
-            <button onclick="document.getElementById('camera').click()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl font-bold text-xl transition shadow-lg shadow-indigo-500/20">
-                📸 Start AI Scan
-            </button>
-            <div id="status" class="text-sm text-slate-500 mt-4">Waiting for capture...</div>
+<body class="bg-[#0f172a] text-white font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
+                <span class="text-indigo-500">🛡️</span> FaceGuard AI
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Dermatology-Grade AI Analysis</p>
+        </header>
+
+        <div class="glass rounded-[2rem] p-6 shadow-2xl relative overflow-hidden">
+            
+            <div id="upload-zone" class="text-center py-12 border-2 border-dashed border-slate-700 rounded-[1.5rem] cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5 transition-all group">
+                <input type="file" id="imageInput" accept="image/*" capture="user" class="hidden" onchange="processImage(event)">
+                <div onclick="document.getElementById('imageInput').click()">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">📸</div>
+                    <p class="text-xl font-bold">Start AI Scan</p>
+                    <p class="text-xs text-slate-500 mt-2 italic">Take a clear photo in good lighting</p>
+                </div>
+            </div>
+
+            <div id="scanning-state" class="hidden py-6 text-center">
+                <div class="relative w-56 h-56 mx-auto bg-slate-800 rounded-2xl overflow-hidden mb-6 border border-slate-700">
+                    <img id="preview" class="w-full h-full object-cover">
+                    <div class="scan-line"></div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-indigo-400 font-bold animate-pulse text-lg">Analyzing Skin Patterns...</p>
+                    <p class="text-slate-500 text-xs">Consulting Gemini 1.5 Pro Vision</p>
+                </div>
+            </div>
+
+            <div id="results" class="hidden space-y-5 animate-in fade-in duration-700">
+                <div class="bg-indigo-600 rounded-2xl p-4 text-center">
+                    <h2 class="text-[10px] uppercase tracking-widest text-indigo-200 font-bold">Skin Classification</h2>
+                    <p id="skin-type" class="text-2xl font-black text-white">---</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Detected Concerns</h3>
+                    <div id="issues-list" class="grid grid-cols-1 gap-2"></div>
+                </div>
+
+                <div class="bg-slate-900/80 rounded-2xl p-4 border border-slate-700">
+                    <h3 class="font-bold text-sm text-yellow-500 flex items-center gap-2 mb-3">
+                        ✨ Recommended Routine
+                    </h3>
+                    <div id="routine-details" class="space-y-3"></div>
+                </div>
+
+                <div class="p-3 bg-red-500/5 rounded-lg border border-red-500/10">
+                    <p id="medical-disclaimer" class="text-[9px] text-slate-500 leading-relaxed"></p>
+                </div>
+                
+                <button onclick="location.reload()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    New Analysis
+                </button>
+            </div>
         </div>
         
-        <div id="results" class="hidden mt-8 p-4 bg-slate-900 rounded-xl text-left border border-slate-700">
-            <pre id="output" class="text-xs text-green-400 overflow-auto max-h-60"></pre>
-        </div>
+        <footer class="mt-8 text-center">
+            <p class="text-[10px] text-slate-600 uppercase tracking-widest">Powered by Google Gemini AI & FaceGuard Engine</p>
+        </footer>
     </div>
 
     <script>
-        const camera = document.getElementById('camera');
-        const status = document.getElementById('status');
-        const output = document.getElementById('output');
-        const resultsDiv = document.getElementById('results');
-
-        camera.onchange = async (e) => {
-            const file = e.target.files[0];
+        async function processImage(event) {
+            const file = event.target.files[0];
             if (!file) return;
 
-            status.innerText = "Processing with Gemini AI...";
+            // UI Switch
+            document.getElementById('upload-zone').classList.add('hidden');
+            document.getElementById('scanning-state').classList.remove('hidden');
+            
+            // Preview
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = async () => {
+                document.getElementById('preview').src = reader.result;
                 const base64 = reader.result.split(',')[1];
+
                 try {
-                    // This automatically calls the same URL the site is hosted on
                     const res = await fetch('/api/scans/analyze', {
-;
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ 
-                            imageBase64: base64, 
-                            hasConsented: true, 
-                            userId: "guest_user" 
-                        })
+                        body: JSON.stringify({ imageBase64: base64 })
                     });
+
                     const data = await res.json();
-                    resultsDiv.classList.remove('hidden');
-                    output.innerText = JSON.stringify(data, null, 2);
-                    status.innerText = "Analysis Complete!";
+                    renderResults(data);
                 } catch (err) {
-                    status.innerText = "Error: " + err.message;
+                    alert("Analysis Failed: " + err.message);
+                    location.reload();
                 }
             };
-        };
+        }
+
+        function renderResults(data) {
+            document.getElementById('scanning-state').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+
+            document.getElementById('skin-type').innerText = data.skinType;
+            document.getElementById('medical-disclaimer').innerText = data.disclaimer;
+
+            // Render Issues
+            const issuesContainer = document.getElementById('issues-list');
+            issuesContainer.innerHTML = data.issues.map(issue => `
+                <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-white font-bold text-sm">${issue.category}</p>
+                        <p class="text-[10px] text-slate-500">${issue.details}</p>
+                    </div>
+                    <span class="px-2 py-1 bg-indigo-500/20 text-indigo-400 text-[9px] font-bold rounded-md">${issue.severity}</span>
+                </div>
+            `).join('');
+
+            // Render Routine
+            const routineContainer = document.getElementById('routine-details');
+            routineContainer.innerHTML = `
+                <div class="text-xs">
+                    <p class="text-slate-400 font-bold mb-1 italic">☀️ Morning</p>
+                    <p class="text-white">${data.routine.morning.join(' → ')}</p>
+                </div>
+                <div class="text-xs mt-2 border-t border-slate-800 pt-2">
+                    <p class="text-slate-400 font-bold mb-1 italic">🌙 Night</p>
+                    <p class="text-white">${data.routine.night.join(' → ')}</p>
+                </div>
+                ${data.skinCycling ? `<div class="mt-3 p-2 bg-orange-500/10 border border-orange-500/20 rounded-lg text-[10px] text-orange-400"><strong>🔄 Skin Cycling:</strong> ${data.skinCycling}</div>` : ''}
+            `;
+        }
     </script>
 </body>
 </html>
