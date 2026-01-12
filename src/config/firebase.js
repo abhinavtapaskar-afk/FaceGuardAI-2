@@ -1,47 +1,62 @@
 const admin = require('firebase-admin');
+require('dotenv').config();
 
-const initFirebase = () => {
-  try {
-    const rawData = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+// Initialize Firebase Admin SDK
+let firebaseApp;
 
-    // DEBUG: This helps us see if the data is corrupted
-    if (rawData && typeof rawData === 'string') {
-        console.log("Data type: String. Starts with:", rawData.substring(0, 15));
-    }
+try {
+  // Parse the private key (handle escaped newlines)
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY 
+    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    : undefined;
 
-    if (!rawData) throw new Error("Environment variable is empty!");
+  const serviceAccount = {
+    type: 'service_account',
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key: privateKey,
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  };
 
-    let serviceAccount;
-    
-    // Safety check: If Vercel already parsed it as an object
-    if (typeof rawData === 'object') {
-      serviceAccount = rawData;
-    } else {
-      // Clean the string: remove any accidental surrounding quotes or whitespace
-      const cleanedData = rawData.trim().replace(/^['"]|['"]$/g, '');
-      serviceAccount = JSON.parse(cleanedData);
-    }
+  firebaseApp = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+  });
 
-    // Fix the private key newlines (the most common fail point)
-    if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-    }
+  console.log('✅ Firebase Admin initialized successfully');
+} catch (error) {
+  console.error('❌ Firebase initialization error:', error.message);
+  throw error;
+}
 
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-      });
-      console.log("✅ Firebase connected successfully using provided keys!");
-    }
-  } catch (err) {
-    console.error("❌ CONNECTION ERROR:", err.message);
-    // This will tell us if it's still failing at 'position 7'
-    if (err.message.includes('position 7')) {
-       console.error("CRITICAL: Vercel is reading the key as '[object Object]'. Check your Env Var settings.");
-    }
-  }
+// Firestore Database
+const db = admin.firestore();
+
+// Firebase Storage
+const bucket = admin.storage().bucket();
+
+// Firebase Auth
+const auth = admin.auth();
+
+// Collections
+const collections = {
+  USERS: 'users',
+  SCANS: 'scans',
+  PRODUCTS: 'products',
+  RECOMMENDATIONS: 'recommendations',
+  SUBSCRIPTIONS: 'subscriptions',
+  PROGRESS: 'progress',
+  LEADERBOARD: 'leaderboard',
+  FEATURE_FLAGS: 'feature_flags',
+  LEGAL_CONSENTS: 'legal_consents',
+  AFFILIATE_CLICKS: 'affiliate_clicks'
 };
 
-initFirebase();
-const db = admin.firestore();
-module.exports = { db };
+module.exports = {
+  admin,
+  db,
+  bucket,
+  auth,
+  collections,
+  firebaseApp
+};
